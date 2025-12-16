@@ -1,4 +1,0 @@
-project_id = "zmmjpgsqnoalfatohmff"
-
-[functions.validate-coupon]
-verify_jwt = false
