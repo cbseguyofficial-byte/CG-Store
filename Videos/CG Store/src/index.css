@@ -1,0 +1,228 @@
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* CBSE GUY Brand Colors */
+    --deep-twilight: 230 97% 19%;
+    --french-blue: 212 96% 28%;
+    --bright-teal-blue: 199 100% 36%;
+    --blue-green: 194 100% 39%;
+    --turquoise-surf: 189 100% 42%;
+    --sky-aqua: 189 73% 59%;
+    --frosted-blue: 191 76% 75%;
+    --frosted-blue-2: 191 85% 82%;
+    --light-cyan: 191 83% 90%;
+
+    /* Semantic mappings */
+    --background: 191 83% 97%;
+    --foreground: 230 97% 19%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 230 97% 19%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 97% 19%;
+
+    --primary: 199 100% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 191 76% 75%;
+    --secondary-foreground: 230 97% 19%;
+
+    --muted: 191 83% 90%;
+    --muted-foreground: 212 96% 28%;
+
+    --accent: 189 100% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 191 50% 85%;
+    --input: 191 50% 85%;
+    --ring: 199 100% 36%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(230 97% 19%) 0%, hsl(199 100% 36%) 50%, hsl(189 100% 42%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(191 83% 97%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(189 100% 42%) 0%, hsl(189 73% 59%) 100%);
+    --gradient-footer: linear-gradient(180deg, hsl(191 83% 90%) 0%, hsl(191 85% 82%) 100%);
+
+    /* Shadows */
+    --shadow-card: 0 4px 20px -4px hsl(199 100% 36% / 0.15);
+    --shadow-card-hover: 0 12px 32px -8px hsl(199 100% 36% / 0.25);
+    --shadow-button: 0 4px 12px -2px hsl(199 100% 36% / 0.3);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 230 97% 19%;
+    --sidebar-primary: 199 100% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 191 83% 90%;
+    --sidebar-accent-foreground: 230 97% 19%;
+    --sidebar-border: 191 50% 85%;
+    --sidebar-ring: 199 100% 36%;
+  }
+
+  .dark {
+    --background: 230 97% 8%;
+    --foreground: 191 83% 90%;
+
+    --card: 230 80% 12%;
+    --card-foreground: 191 83% 90%;
+
+    --popover: 230 80% 12%;
+    --popover-foreground: 191 83% 90%;
+
+    --primary: 189 100% 42%;
+    --primary-foreground: 230 97% 19%;
+
+    --secondary: 212 96% 28%;
+    --secondary-foreground: 191 83% 90%;
+
+    --muted: 230 60% 20%;
+    --muted-foreground: 191 76% 75%;
+
+    --accent: 189 73% 59%;
+    --accent-foreground: 230 97% 19%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 230 60% 25%;
+    --input: 230 60% 25%;
+    --ring: 189 100% 42%;
+
+    --sidebar-background: 230 80% 10%;
+    --sidebar-foreground: 191 83% 90%;
+    --sidebar-primary: 189 100% 42%;
+    --sidebar-primary-foreground: 230 97% 19%;
+    --sidebar-accent: 230 60% 20%;
+    --sidebar-accent-foreground: 191 83% 90%;
+    --sidebar-border: 230 60% 25%;
+    --sidebar-ring: 189 100% 42%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-lg border border-border/50 shadow-card;
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .gradient-footer {
+    background: var(--gradient-footer);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background: var(--gradient-accent);
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-1;
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .btn-glow {
+    @apply relative overflow-hidden;
+  }
+
+  .btn-glow::after {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, hsl(var(--sky-aqua) / 0.3) 0%, transparent 100%);
+  }
+
+  .btn-glow:hover::after {
+    @apply opacity-100;
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 3s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.5s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.3s ease-out;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+}
