@@ -33,30 +33,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /* ---------------- FETCH PROFILE + ROLE ---------------- */
 
   const fetchProfileAndRole = async (userId: string) => {
-    // Reset first (important on account switch)
-    setProfile(null);
-    setIsAdmin(false);
+    try {
+      setIsLoading(true); // 🔴 IMPORTANT
 
-    // Fetch profile
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
-    if (!profileError && profileData) {
-      setProfile(profileData);
+      setProfile(profileData ?? null);
+
+      // Fetch admin role
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      setIsAdmin(!!roleData);
+    } finally {
+      setIsLoading(false); // 🔴 ONLY AFTER BOTH QUERIES
     }
-
-    // Fetch role
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    setIsAdmin(!!roleData);
   };
 
   const refreshProfile = async () => {
@@ -70,22 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Initial session check
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
 
-      const currentSession = data.session;
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
 
-      if (currentSession?.user) {
-        fetchProfileAndRole(currentSession.user.id);
+      if (data.session?.user) {
+        fetchProfileAndRole(data.session.user.id);
+      } else {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     });
 
-    // Auth change listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -99,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setIsAdmin(false);
+        setIsLoading(false);
       }
     });
 
@@ -126,8 +124,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setIsAdmin(false);
   };
-
-  /* ---------------- CONTEXT VALUE ---------------- */
 
   return (
     <AuthContext.Provider
