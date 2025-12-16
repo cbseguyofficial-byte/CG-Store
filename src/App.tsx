@@ -66,10 +66,9 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Auth page - Google Sign-In only */}
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/register" element={<AuthPage />} />
-            <Route path="/auth" element={<AuthPage />} />
+            {/* Auth fallback (Google Sign-In only) */}
+              <Route path="/auth" element={<AuthPage />} />
+
 
             {/* Public pages with layout */}
             <Route element={<PublicLayout />}>
