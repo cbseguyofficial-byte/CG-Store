@@ -45,9 +45,13 @@ const OrdersPage = () => {
   const { data: orders, isLoading } = useOrders();
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const filteredOrders = statusFilter === "all" 
-    ? orders 
-    : orders?.filter(order => order.status.toLowerCase() === statusFilter.toUpperCase());
+  const filteredOrders =
+  statusFilter === "all"
+    ? orders
+    : orders?.filter(
+        (order) => order.status === statusFilter.toUpperCase()
+      );
+
 
   if (isLoading) {
     return (
