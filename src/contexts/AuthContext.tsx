@@ -46,14 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(profileData ?? null);
 
       // Fetch admin role
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("is_admin");
 
-      setIsAdmin(!!roleData);
+       if (error) {
+          console.error("Admin check failed:", error);
+         setIsAdmin(false);
+        } else {
+     setIsAdmin(!!data);
+}
+
     } finally {
       setIsLoading(false); // 🔴 ONLY AFTER BOTH QUERIES
     }
