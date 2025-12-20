@@ -8,38 +8,29 @@ export function useReferralStats() {
 
   return useQuery({
     queryKey: ["referral-stats", user?.id],
-    queryFn: async (): Promise<ReferralStats> => {
-      if (!user || !profile) {
-        return {
-          referral_code: "",
-          total_referred: 0,
-          successful_referrals: 0,
-          pending_rewards: 0,
-          earned_rewards: 0,
-        };
-      }
-
-      // Get all referrals where user is the referrer
-      const { data: referrals, error } = await supabase
-        .from("referrals")
-        .select("*")
-        .eq("referrer_user_id", user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      const stats: ReferralStats = {
-        referral_code: profile.referral_code || "",
-        total_referred: referrals?.length || 0,
-        successful_referrals: referrals?.filter(r => r.reward_status === "EARNED" || r.reward_status === "REDEEMED").length || 0,
-        pending_rewards: referrals?.filter(r => r.reward_status === "PENDING").length || 0,
-        earned_rewards: referrals?.filter(r => r.reward_status === "EARNED").length || 0,
-      };
-
-      return stats;
-    },
     enabled: !!user && !!profile,
+    queryFn: async (): Promise<ReferralStats> => {
+      const { data, error } = await supabase
+        .from("referrals")
+        .select("reward_status")
+        .eq("referrer_user_id", user!.id);
+
+      if (error) throw error;
+
+      const total = data.length;
+      const earned = data.filter(
+        r => r.reward_status === "EARNED" || r.reward_status === "REDEEMED"
+      ).length;
+      const pending = data.filter(r => r.reward_status === "PENDING").length;
+
+      return {
+        referral_code: profile!.referral_code,
+        total_referred: total,
+        successful_referrals: earned,
+        pending_rewards: pending,
+        earned_rewards: earned,
+      };
+    },
   });
 }
 
@@ -48,44 +39,17 @@ export function useReferrals() {
 
   return useQuery({
     queryKey: ["referrals", user?.id],
+    enabled: !!user,
     queryFn: async () => {
-      if (!user) return [];
-
       const { data, error } = await supabase
         .from("referrals")
         .select("*")
-        .eq("referrer_user_id", user.id)
+        .eq("referrer_user_id", user!.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       return data as Referral[];
-    },
-    enabled: !!user,
-  });
-}
-
-// Admin hook
-export function useAdminReferrals() {
-  return useQuery({
-    queryKey: ["admin-referrals"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("referrals")
-        .select(`
-          *,
-          referrer:profiles!referrer_user_id (*),
-          referred:profiles!referred_user_id (*)
-        `)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
     },
   });
 }

@@ -25,7 +25,7 @@ const DownloadsPage = () => {
             <p className="font-medium">Download Policy</p>
             <p className="text-muted-foreground">
               Digital files become available only after order confirmation.
-              Download links are time-limited for security.
+              Download links are time-limited for security reasons.
             </p>
           </div>
         </CardContent>
