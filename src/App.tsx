@@ -40,7 +40,6 @@ import WishlistPage from "./pages/dashboard/WishlistPage";
 import ReferralsPage from "./pages/dashboard/ReferralsPage";
 import NotificationsPage from "./pages/dashboard/NotificationsPage";
 import ProfilePage from "./pages/dashboard/ProfilePage";
-import SecurityPage from "./pages/dashboard/SecurityPage";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -105,7 +104,6 @@ const App = () => (
               <Route path="referrals" element={<ReferralsPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="profile" element={<ProfilePage />} />
-              <Route path="security" element={<SecurityPage />} />
             </Route>
 
             {/* Admin Routes - Protected with Admin check */}

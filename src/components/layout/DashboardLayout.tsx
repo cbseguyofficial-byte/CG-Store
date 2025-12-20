@@ -25,7 +25,6 @@ const sidebarItems = [
   { icon: Users, label: "Referrals", path: "/dashboard/referrals" },
   { icon: Bell, label: "Notifications", path: "/dashboard/notifications" },
   { icon: User, label: "Profile & Addresses", path: "/dashboard/profile" },
-  { icon: Shield, label: "Security", path: "/dashboard/security" },
 ];
 
 const DashboardLayout = () => {
