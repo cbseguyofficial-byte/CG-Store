@@ -28,12 +28,12 @@ const AdminProductEdit = () => {
     class: "",
     subject: "",
     board: "CBSE",
-    format: "PDF",
+    format: "",
     tags: "",
     badges: "",
     inStock: true,
     stockCount: "100",
-    status: "DRAFT",
+    status: "",
     adminNote: "",
   });
 
