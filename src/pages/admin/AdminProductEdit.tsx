@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Save, Upload, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +10,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminProductEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = !id || id === "new";
+
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -30,14 +33,119 @@ const AdminProductEdit = () => {
     badges: "",
     inStock: true,
     stockCount: "100",
-    status: "draft",
+    status: "DRAFT",
     adminNote: "",
   });
 
   const [images, setImages] = useState<string[]>([]);
 
-  const handleSave = () => {
-    toast.success(isNew ? "Product created (demo)" : "Product updated (demo)");
+  /* ---------------- LOAD PRODUCT IF EDIT ---------------- */
+
+  useEffect(() => {
+    if (!isNew && id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  const fetchProduct = async () => {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      toast.error("Failed to load product");
+      setLoading(false);
+      return;
+    }
+
+    setFormData({
+      title: data.title || "",
+      subtitle: data.subtitle || "",
+      description: data.description || "",
+      price: data.sale_price?.toString() || "",
+      mrp: data.mrp?.toString() || "",
+      class: data.class || "",
+      subject: data.subject || "",
+      board: data.board || "CBSE",
+      format: data.format || "PDF",
+      tags: data.tags?.join(", ") || "",
+      badges: data.badges?.join(", ") || "",
+      inStock: data.stock_count > 0,
+      stockCount: data.stock_count?.toString() || "0",
+      status: data.status || "DRAFT",
+      adminNote: "",
+    });
+
+    setLoading(false);
+  };
+
+  /* ---------------- SAVE PRODUCT ---------------- */
+
+  const handleSave = async () => {
+    if (!formData.title || !formData.price || !formData.mrp) {
+      toast.error("Please fill required fields");
+      return;
+    }
+
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]/g, "");
+
+    const payload = {
+      slug,
+      title: formData.title,
+      subtitle: formData.subtitle,
+      description: formData.description,
+      mrp: Number(formData.mrp),
+      sale_price: Number(formData.price),
+      class: formData.class,
+      subject: formData.subject,
+      board: formData.board,
+      format: formData.format,
+      tags: formData.tags
+        ? formData.tags.split(",").map((t) => t.trim())
+        : [],
+      badges: formData.badges
+        ? formData.badges.split(",").map((b) => b.trim())
+        : [],
+      stock_count: formData.inStock ? Number(formData.stockCount) : 0,
+      status: formData.status,
+      updated_at: new Date().toISOString(),
+    };
+
+    setLoading(true);
+
+    if (isNew) {
+      const { error } = await supabase.from("products").insert(payload);
+
+      if (error) {
+        toast.error(error.message);
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Product created successfully");
+    } else {
+      const { error } = await supabase
+        .from("products")
+        .update(payload)
+        .eq("id", id);
+
+      if (error) {
+        toast.error(error.message);
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Product updated successfully");
+    }
+
+    setLoading(false);
     navigate("/admin/products");
   };
 
@@ -56,9 +164,9 @@ const AdminProductEdit = () => {
           </h1>
           <p className="text-frosted-blue">Fill in the product details</p>
         </div>
-        <Button onClick={handleSave} className="gap-2">
+        <Button onClick={handleSave} className="gap-2" disabled={loading}>
           <Save className="h-4 w-4" />
-          Save Product
+          {loading ? "Saving..." : "Save Product"}
         </Button>
       </div>
 

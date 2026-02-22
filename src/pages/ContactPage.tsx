@@ -123,8 +123,8 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold">Email</h3>
-                      <a href="mailto:support@cbseguy.com" className="text-primary hover:underline">
-                        support@cbseguy.com
+                      <a href="mailto:support@cbseguy.in" className="text-primary hover:underline">
+                        support@cbseguy.in
                       </a>
                     </div>
                   </div>
