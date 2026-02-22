@@ -71,12 +71,12 @@ const AdminProductEdit = () => {
       class: data.class || "",
       subject: data.subject || "",
       board: data.board || "CBSE",
-      format: data.format || "PDF",
+      format: data.format || "",
       tags: data.tags?.join(", ") || "",
       badges: data.badges?.join(", ") || "",
       inStock: data.stock_count > 0,
       stockCount: data.stock_count?.toString() || "0",
-      status: data.status || "DRAFT",
+      status: data.status || "",
       adminNote: "",
     });
 
