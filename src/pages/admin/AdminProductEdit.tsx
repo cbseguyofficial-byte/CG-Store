@@ -96,28 +96,30 @@ const AdminProductEdit = () => {
       .replace(/\s+/g, "-")
       .replace(/[^\w-]/g, "");
 
-    const payload = {
-      slug,
-      title: formData.title,
-      subtitle: formData.subtitle,
-      description: formData.description,
-      mrp: Number(formData.mrp),
-      sale_price: Number(formData.price),
-      class: formData.class,
-      subject: formData.subject,
-      board: formData.board,
-      format: formData.format,
-      tags: formData.tags
-        ? formData.tags.split(",").map((t) => t.trim())
-        : [],
-      badges: formData.badges
-        ? formData.badges.split(",").map((b) => b.trim())
-        : [],
-      stock_count: formData.inStock ? Number(formData.stockCount) : 0,
-      status: formData.status,
-      updated_at: new Date().toISOString(),
-    };
+const payload = {
+  slug,
+  title: formData.title,
+  subtitle: formData.subtitle,
+  description: formData.description,
+  mrp: Number(formData.mrp),
+  sale_price: Number(formData.price),
+  class: formData.class,
+  subject: formData.subject,
+  board: formData.board,
 
+  // 🔥 FIX ENUMS HERE
+  format: formData.format.toUpperCase(), 
+  status: formData.status.toUpperCase(),
+
+  tags: formData.tags
+    ? formData.tags.split(",").map((t) => t.trim())
+    : [],
+  badges: formData.badges
+    ? formData.badges.split(",").map((b) => b.trim())
+    : [],
+  stock_count: formData.inStock ? Number(formData.stockCount) : 0,
+  updated_at: new Date().toISOString(),
+};
     setLoading(true);
 
     if (isNew) {
@@ -295,8 +297,8 @@ const AdminProductEdit = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="PDF">PDF</SelectItem>
-                      <SelectItem value="Physical">Physical</SelectItem>
-                      <SelectItem value="Combo">Combo</SelectItem>
+                      <SelectItem value="PHYSICAL">Physical</SelectItem>
+                      <SelectItem value="COMBO">Combo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -356,9 +358,9 @@ const AdminProductEdit = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="unlisted">Unlisted</SelectItem>
+                    <SelectItem value="DRAFT">Draft</SelectItem>
+                    <SelectItem value="PUBLISHED">Published</SelectItem>
+                    <SelectItem value="UNLISTED">Unlisted</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
