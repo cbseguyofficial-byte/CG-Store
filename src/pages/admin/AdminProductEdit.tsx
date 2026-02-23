@@ -152,14 +152,12 @@ const payload = {
     navigate("/admin/products");
   };
 
-  const handleImageUpload = async (
+const handleImageUpload = async (
   event: React.ChangeEvent<HTMLInputElement>
 ) => {
   if (!event.target.files || !id) return;
 
   const files = Array.from(event.target.files);
-  await fetchImages();  // 👈 add this
-toast.success("Image uploaded successfully");
 
   for (const file of files) {
     const filePath = `${id}/${Date.now()}-${file.name}`;
@@ -177,11 +175,26 @@ toast.success("Image uploaded successfully");
       .from("product-images")
       .getPublicUrl(filePath);
 
-    await supabase.from("product_images").insert({
-      product_id: id,
-      image_url: publicUrlData.publicUrl,
-      sort_order: 0,
-    });
+    const imageUrl = publicUrlData.publicUrl;
+
+    // Insert into DB
+    const { data: insertedImage, error: insertError } = await supabase
+      .from("product_images")
+      .insert({
+        product_id: id,
+        image_url: imageUrl,
+        sort_order: 0,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      toast.error(insertError.message);
+      return;
+    }
+
+    // 🔥 INSTANT STATE UPDATE (no reload needed)
+    setImages((prev) => [...prev, insertedImage]);
   }
 
   toast.success("Image uploaded successfully");
