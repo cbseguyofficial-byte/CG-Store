@@ -151,6 +151,39 @@ const payload = {
     navigate("/admin/products");
   };
 
+  const handleImageUpload = async (
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  if (!event.target.files || !id) return;
+
+  const files = Array.from(event.target.files);
+
+  for (const file of files) {
+    const filePath = `${id}/${Date.now()}-${file.name}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      toast.error(uploadError.message);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    await supabase.from("product_images").insert({
+      product_id: id,
+      image_url: publicUrlData.publicUrl,
+      sort_order: 0,
+    });
+  }
+
+  toast.success("Image uploaded successfully");
+};
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -332,14 +365,31 @@ const payload = {
               <CardTitle className="text-light-cyan">Images</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 text-center">
-                <Upload className="h-12 w-12 text-frosted-blue mx-auto mb-4" />
-                <p className="text-frosted-blue mb-2">Drag and drop images here</p>
-                <Button variant="outline" className="border-primary/30 text-light-cyan">
-                  Browse Files
-                </Button>
-              </div>
-            </CardContent>
+  <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 text-center">
+    <Upload className="h-12 w-12 text-frosted-blue mx-auto mb-4" />
+    <p className="text-frosted-blue mb-2">Drag and drop images here</p>
+
+    {/* Hidden File Input */}
+    <input
+      type="file"
+      accept="image/*"
+      multiple
+      id="product-image-upload"
+      className="hidden"
+      onChange={handleImageUpload}
+    />
+
+    <Button
+      variant="outline"
+      className="border-primary/30 text-light-cyan"
+      onClick={() =>
+        document.getElementById("product-image-upload")?.click()
+      }
+    >
+      Browse Files
+    </Button>
+  </div>
+</CardContent>
           </Card>
         </div>
 
