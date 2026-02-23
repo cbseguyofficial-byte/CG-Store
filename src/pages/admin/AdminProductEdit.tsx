@@ -37,13 +37,14 @@ const AdminProductEdit = () => {
     adminNote: "",
   });
 
-  const [images, setImages] = useState<string[]>([]);
+const [images, setImages] = useState<any[]>([]);
 
   /* ---------------- LOAD PRODUCT IF EDIT ---------------- */
 
   useEffect(() => {
     if (!isNew && id) {
       fetchProduct();
+      fetchImages();
     }
   }, [id]);
 
@@ -157,6 +158,8 @@ const payload = {
   if (!event.target.files || !id) return;
 
   const files = Array.from(event.target.files);
+  await fetchImages();  // 👈 add this
+toast.success("Image uploaded successfully");
 
   for (const file of files) {
     const filePath = `${id}/${Date.now()}-${file.name}`;
@@ -182,6 +185,34 @@ const payload = {
   }
 
   toast.success("Image uploaded successfully");
+};
+
+const fetchImages = async () => {
+  if (!id) return;
+
+  const { data, error } = await supabase
+    .from("product_images")
+    .select("*")
+    .eq("product_id", id)
+    .order("sort_order", { ascending: true });
+
+  if (!error && data) {
+    setImages(data);
+  }
+};
+const handleDeleteImage = async (image: any) => {
+  const filePath = image.image_url.split("/product-images/")[1];
+
+  await supabase.storage
+    .from("product-images")
+    .remove([filePath]);
+
+  await supabase
+    .from("product_images")
+    .delete()
+    .eq("id", image.id);
+
+  await fetchImages();
 };
 
   return (
@@ -369,7 +400,6 @@ const payload = {
     <Upload className="h-12 w-12 text-frosted-blue mx-auto mb-4" />
     <p className="text-frosted-blue mb-2">Drag and drop images here</p>
 
-    {/* Hidden File Input */}
     <input
       type="file"
       accept="image/*"
@@ -389,6 +419,32 @@ const payload = {
       Browse Files
     </Button>
   </div>
+
+  {/* 🔥 Image Preview Section */}
+  {images.length > 0 && (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+      {images.map((img) => (
+        <div
+          key={img.id}
+          className="relative group rounded-xl overflow-hidden"
+        >
+          <img
+            src={img.image_url}
+            alt="product"
+            className="w-full h-40 object-cover rounded-xl"
+          />
+
+          {/* Delete Button */}
+          <button
+            onClick={() => handleDeleteImage(img)}
+            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
 </CardContent>
           </Card>
         </div>
