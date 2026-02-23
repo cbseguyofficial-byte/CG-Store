@@ -41,12 +41,12 @@ const [images, setImages] = useState<any[]>([]);
 
   /* ---------------- LOAD PRODUCT IF EDIT ---------------- */
 
-  useEffect(() => {
-    if (!isNew && id) {
-      fetchProduct();
-      fetchImages();
-    }
-  }, [id]);
+useEffect(() => {
+  if (id) {
+    fetchProduct();
+    fetchImages();
+  }
+}, [id]);
 
   const fetchProduct = async () => {
     setLoading(true);
@@ -196,9 +196,12 @@ const fetchImages = async () => {
     .eq("product_id", id)
     .order("sort_order", { ascending: true });
 
-  if (!error && data) {
-    setImages(data);
+  if (error) {
+    console.error(error);
+    return;
   }
+
+  setImages(data || []);
 };
 const handleDeleteImage = async (image: any) => {
   const filePath = image.image_url.split("/product-images/")[1];
