@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Save, CreditCard, Upload, Settings } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,18 +6,107 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminSettings = () => {
+  const [settingsId, setSettingsId] = useState<string | null>(null);
+
   const [settings, setSettings] = useState({
-    upiId: "cbseguy@upi",
-    paymentInstructions: "1. Scan the QR code above using any UPI app\n2. Enter the exact amount shown\n3. Complete the payment within 5 minutes\n4. Note down the transaction ID",
-    siteName: "CBSE GUY",
-    supportEmail: "support@cbseguy.com",
-    supportPhone: "+91 98765 43210",
+    upiId: "",
+    paymentInstructions: "",
+    siteName: "",
+    supportEmail: "",
+    supportPhone: "",
+    logoUrl: "",
+    qrCodeUrl: "",
   });
 
-  const handleSave = () => {
-    toast.success("Settings saved (demo)");
+  /* ---------------- LOAD SETTINGS ---------------- */
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    const { data } = await supabase
+      .from("store_settings")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      setSettingsId(data.id);
+      setSettings({
+        upiId: data.upi_id || "",
+        paymentInstructions: data.payment_instructions || "",
+        siteName: data.site_name || "",
+        supportEmail: data.support_email || "",
+        supportPhone: data.support_phone || "",
+        logoUrl: data.logo_url || "",
+        qrCodeUrl: data.qr_code_url || "",
+      });
+    }
+  };
+
+  /* ---------------- SAVE SETTINGS ---------------- */
+
+  const handleSave = async () => {
+    const payload = {
+      upi_id: settings.upiId,
+      payment_instructions: settings.paymentInstructions,
+      site_name: settings.siteName,
+      support_email: settings.supportEmail,
+      support_phone: settings.supportPhone,
+      logo_url: settings.logoUrl,
+      qr_code_url: settings.qrCodeUrl,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (settingsId) {
+      await supabase
+        .from("store_settings")
+        .update(payload)
+        .eq("id", settingsId);
+    } else {
+      const { data } = await supabase
+        .from("store_settings")
+        .insert(payload)
+        .select()
+        .single();
+
+      setSettingsId(data?.id || null);
+    }
+
+    toast.success("Settings saved successfully");
+  };
+
+  /* ---------------- IMAGE UPLOAD ---------------- */
+
+  const uploadImage = async (
+    file: File,
+    field: "logoUrl" | "qrCodeUrl"
+  ) => {
+    const filePath = `settings/${Date.now()}-${file.name}`;
+
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, file, { upsert: true });
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    const { data } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    setSettings((prev) => ({
+      ...prev,
+      [field]: data.publicUrl,
+    }));
+
+    toast.success("Image uploaded");
   };
 
   return (
@@ -43,32 +132,63 @@ const AdminSettings = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+
             <div className="space-y-2">
               <Label className="text-frosted-blue">UPI ID</Label>
               <Input
                 value={settings.upiId}
-                onChange={(e) => setSettings({ ...settings, upiId: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, upiId: e.target.value })
+                }
                 placeholder="yourname@upi"
                 className="bg-deep-twilight/50 border-primary/20 text-light-cyan font-mono"
               />
             </div>
 
+            {/* Hidden QR input */}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="qr-upload"
+              onChange={(e) =>
+                e.target.files &&
+                uploadImage(e.target.files[0], "qrCodeUrl")
+              }
+            />
+
             <div className="space-y-2">
               <Label className="text-frosted-blue">QR Code</Label>
               <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center">
                 <Upload className="h-8 w-8 text-frosted-blue mx-auto mb-2" />
-                <p className="text-sm text-frosted-blue mb-2">Upload QR Code Image</p>
-                <Button variant="outline" size="sm" className="border-primary/30 text-light-cyan">
+                <p className="text-sm text-frosted-blue mb-2">
+                  Upload QR Code Image
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-primary/30 text-light-cyan"
+                  onClick={() =>
+                    document.getElementById("qr-upload")?.click()
+                  }
+                >
                   Browse
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-frosted-blue">Payment Instructions</Label>
+              <Label className="text-frosted-blue">
+                Payment Instructions
+              </Label>
               <Textarea
                 value={settings.paymentInstructions}
-                onChange={(e) => setSettings({ ...settings, paymentInstructions: e.target.value })}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    paymentInstructions: e.target.value,
+                  })
+                }
                 rows={5}
                 className="bg-deep-twilight/50 border-primary/20 text-light-cyan"
               />
@@ -85,21 +205,45 @@ const AdminSettings = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+
             <div className="space-y-2">
               <Label className="text-frosted-blue">Site Name</Label>
               <Input
                 value={settings.siteName}
-                onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, siteName: e.target.value })
+                }
                 className="bg-deep-twilight/50 border-primary/20 text-light-cyan"
               />
             </div>
+
+            {/* Hidden logo input */}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="logo-upload"
+              onChange={(e) =>
+                e.target.files &&
+                uploadImage(e.target.files[0], "logoUrl")
+              }
+            />
 
             <div className="space-y-2">
               <Label className="text-frosted-blue">Logo</Label>
               <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center">
                 <Upload className="h-8 w-8 text-frosted-blue mx-auto mb-2" />
-                <p className="text-sm text-frosted-blue mb-2">Upload Logo Image</p>
-                <Button variant="outline" size="sm" className="border-primary/30 text-light-cyan">
+                <p className="text-sm text-frosted-blue mb-2">
+                  Upload Logo Image
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-primary/30 text-light-cyan"
+                  onClick={() =>
+                    document.getElementById("logo-upload")?.click()
+                  }
+                >
                   Browse
                 </Button>
               </div>
@@ -110,7 +254,9 @@ const AdminSettings = () => {
               <Input
                 type="email"
                 value={settings.supportEmail}
-                onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, supportEmail: e.target.value })
+                }
                 className="bg-deep-twilight/50 border-primary/20 text-light-cyan"
               />
             </div>
@@ -119,10 +265,13 @@ const AdminSettings = () => {
               <Label className="text-frosted-blue">Support Phone</Label>
               <Input
                 value={settings.supportPhone}
-                onChange={(e) => setSettings({ ...settings, supportPhone: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, supportPhone: e.target.value })
+                }
                 className="bg-deep-twilight/50 border-primary/20 text-light-cyan"
               />
             </div>
+
           </CardContent>
         </Card>
       </div>
