@@ -25,11 +25,9 @@ const values = [
 ];
 
 const timeline = [
-  { year: "2020", title: "The Beginning", description: "Started as a small initiative to help CBSE students with quality study materials." },
-  { year: "2021", title: "Digital Launch", description: "Launched our digital platform with PDF books for instant access." },
-  { year: "2022", title: "Growing Community", description: "Reached 10,000+ students and expanded to cover all major subjects." },
-  { year: "2023", title: "Physical Books", description: "Added physical book delivery to serve students who prefer printed materials." },
-  { year: "2024", title: "2025 Editions", description: "Released comprehensive 2025 edition books with updated syllabus coverage." },
+  { year: "2024", title: "The Beginning", description: "Started as a small initiative to help CBSE students with quality study materials." },
+  { year: "2025", title: "Digital Launch", description: "Launched our digital platform with PDF books for instant access." },
+  { year: "2026", title: "Growing Community", description: "Reached 10,000+ students and expanded to cover all major subjects." },
 ];
 
 const AboutPage = () => {

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import emailjs from "@emailjs/browser";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -16,11 +17,30 @@ const ContactPage = () => {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    await emailjs.send(
+      "service_nw690sp",      
+      "template_vesc08j",     
+      {
+        name: formData.name,
+        email: formData.email,
+        topic: formData.topic,
+        message: formData.message,
+      },
+      "nr4_2zKGkr4Xs7_aw"       
+    );
+
     toast.success("Message sent! We'll get back to you soon.");
     setFormData({ name: "", email: "", topic: "", message: "" });
-  };
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to send message. Please try again.");
+  }
+};
 
   return (
     <div className="min-h-screen">
